@@ -31,8 +31,7 @@ class Phone(Field):
     @Field.value.setter
     def value(self, value: str) -> None:
         if (len(value) == 13 or len(value) == 10 or len(value) == 12 or len(value) == 9) and (
-                value.startswith("380")
-                or value.startswith("+380") or value.startswith("0") or value.startswith("+0")):
+                value.startswith("380") or value.startswith("+380") or value.startswith("0") or value.startswith("+0")):
             self._value = value
         else:
             raise ValueError
@@ -90,13 +89,15 @@ class AddressBook(UserDict):
         self.data[rec.name.value] = rec
 
     def iterator(self, max_count):
-        count = 0
-        for k in self.data:
-            if count < max_count:
-                count += 1
-                yield self.data[k]
-        else:
-            raise StopIteration
+        index, str_value = 1, '*' * 50 + '\n'
+        for record in self.data.values():
+            str_value += str(record) + '\n'
+            if index < max_count:
+                index += 1
+            else:
+                yield str_value
+                index, str_value = 1, '*' * 50 + '\n'
+        yield str_value
 
     def show_c_w(self, value):
         ls = []
@@ -224,8 +225,11 @@ def input_day_to_hb(*args):
 
 @input_error
 def input_show_n(*args):
-    for i in ab.iterator(int(args[0])):
-        print(i)
+    result = ''
+    print_list = ab.iterator(int(args[0]))
+    for item in print_list:
+        result += f'{item}'
+    return result
 
 
 @input_error
@@ -275,10 +279,7 @@ def main():
         user_input = input(">>>")
         user_input1 = user_input.lower()
         command, data = command_parser(user_input1)
-        if command == "display":
-            command(*data)
-        else:
-            print(command(*data))
+        print(command(*data))
         if command == input_bye:
             ab.dump()
             break
